@@ -2,7 +2,6 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Countdown Experiment (Images)</title>
 
   <!-- jsPsych core + plugins (v6.3.1) -->
@@ -23,9 +22,10 @@
 <body></body>
 
 <script>
-/* ========== CONFIG ========== */
-var USE_BEEPS = false; // set true only if beep.mp3 and double_beep.mp3 are present
+/* ======= CONFIG ======= */
+var USE_BEEPS = false; // set true only if beep.mp3 & double_beep.mp3 exist next to index.html
 
+// Filenames (adjust if yours differ)
 var FILES = {
   testImage: 'test_image.jpeg',
   startImage: 'start_exp_image.jpeg',
@@ -36,10 +36,9 @@ var FILES = {
   doubleBeep: 'double_beep.mp3'
 };
 
-var EXP_IMAGE_LEADIN = 1000; // ms show image before 60s timer
 var timeline = [];
 
-/* Preload (will stop if a file is missing) */
+/* ======= PRELOAD ======= */
 timeline.push({
   type: 'preload',
   images: [FILES.testImage, FILES.startImage, FILES.exp1, FILES.exp2, FILES.exp3],
@@ -47,7 +46,9 @@ timeline.push({
   continue_after_error: false
 });
 
-/* START button (begin experiment) */
+/* ======= FLOW (mirrors your original) ======= */
+
+// START button (begin)
 timeline.push({
   type: 'html-keyboard-response',
   stimulus:
@@ -57,7 +58,7 @@ timeline.push({
   choices: jsPsych.NO_KEYS
 });
 
-/* TEST image — stays until participant clicks START */
+// "Test image" (replaces test_video.mp4) — auto-advance on image end? No video, so self-paced START:
 timeline.push({
   type: 'html-keyboard-response',
   stimulus:
@@ -69,7 +70,7 @@ timeline.push({
   choices: jsPsych.NO_KEYS
 });
 
-/* 15-second countdown (15 → 0) */
+// 15-second countdown (15 → 0)
 for (var i = 15; i >= 0; i--) {
   timeline.push({
     type: 'html-keyboard-response',
@@ -79,7 +80,7 @@ for (var i = 15; i >= 0; i--) {
   });
 }
 
-/* After countdown – KONIEC CZASU (short pause) */
+// After 15s countdown – show KONIEC CZASU (smaller, no button) for 2s
 timeline.push({
   type: 'html-keyboard-response',
   stimulus: '<div class="end-text">KONIEC CZASU</div>',
@@ -87,20 +88,11 @@ timeline.push({
   trial_duration: 2000
 });
 
-/* Helper: experimental image block + 60s timer (+ optional beeps) + end screen */
+// Helper to add an "experimental image" + 60s timer + (optional) beeps + end screen
 function addExpBlock(imageFile, isFinal) {
-  // brief lead-in with the image
-  timeline.push({
-    type: 'html-keyboard-response',
-    stimulus:
-      '<div class="center">' +
-        '<img class="stim" src="' + imageFile + '" alt="experimental image" />' +
-      '</div>',
-    choices: jsPsych.NO_KEYS,
-    trial_duration: EXP_IMAGE_LEADIN
-  });
+  // (Your original had an exp video, then timer; here we show the image throughout the timer)
 
-  // first second of 60s countdown: optional beep + image + "60"
+  // First second: optional beep + image + "60"
   var startBeep = USE_BEEPS
     ? '<audio autoplay><source src="' + FILES.beep + '" type="audio/mpeg"></audio>'
     : '';
@@ -117,7 +109,7 @@ function addExpBlock(imageFile, isFinal) {
     trial_duration: 1000
   });
 
-  // remaining 59 → 0 seconds with image visible
+  // Remaining 59 → 0 seconds with the image visible
   for (var s = 59; s >= 0; s--) {
     timeline.push({
       type: 'html-keyboard-response',
@@ -131,11 +123,11 @@ function addExpBlock(imageFile, isFinal) {
     });
   }
 
+  // End screens
   if (!isFinal) {
     var dblBeep = USE_BEEPS
       ? '<audio autoplay><source src="' + FILES.doubleBeep + '" type="audio/mpeg"></audio>'
       : '';
-    // intermediate blocks: (optional) double beep + KONIEC CZASU + DALEJ
     timeline.push({
       type: 'html-keyboard-response',
       stimulus:
@@ -149,7 +141,6 @@ function addExpBlock(imageFile, isFinal) {
       choices: jsPsych.NO_KEYS
     });
   } else {
-    // final block: show KONIEC only (3s)
     timeline.push({
       type: 'html-keyboard-response',
       stimulus: '<div class="final-text">KONIEC</div>',
@@ -159,7 +150,7 @@ function addExpBlock(imageFile, isFinal) {
   }
 }
 
-/* Start experimental phase: image + START */
+// "Start exp" screen (replaces start_exp_video.mp4) + START button
 timeline.push({
   type: 'html-keyboard-response',
   stimulus:
@@ -171,12 +162,13 @@ timeline.push({
   choices: jsPsych.NO_KEYS
 });
 
-/* Experimental image blocks */
+// Experimental images (replace exp_video1/2/3.mp4)
 addExpBlock(FILES.exp1, false);
 addExpBlock(FILES.exp2, false);
-addExpBlock(FILES.exp3, true); // final block – ends with KONIEC only
+addExpBlock(FILES.exp3, true); // Final block – ends with KONIEC only
 
-/* Start experiment */
+// Start experiment
 jsPsych.init({ timeline: timeline });
 </script>
 </html>
+
