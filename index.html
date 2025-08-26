@@ -3,9 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <title>Countdown Experiment (Images)</title>
+
+  <!-- jsPsych core + plugins -->
   <script src="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/jspsych.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/plugins/jspsych-preload.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/css/jspsych.css" rel="stylesheet" />
+
   <style>
     img.stim {
       width: 800px;
@@ -30,13 +34,8 @@
       text-align: center;
       margin-top: 30px;
     }
-    .center {
-      text-align: center;
-    }
-    button {
-      font-size: 24px;
-      padding: 10px 25px;
-    }
+    .center { text-align: center; }
+    button { font-size: 24px; padding: 10px 25px; }
   </style>
 </head>
 <body></body>
@@ -45,20 +44,30 @@
 /* ============
    CONFIG
    ============ */
+const USE_BEEPS = false; // set to true if you add beep.mp3 + double_beep.mp3
+
 const FILES = {
-  testImage: 'test_image.jpg',
-  startImage: 'start_exp_image.jpg',
-  exp1: 'exp_image1.jpg',
-  exp2: 'exp_image2.jpg',
-  exp3: 'exp_image3.jpg',
+  testImage: 'test_image.jpeg',
+  startImage: 'start_exp_image.jpeg',
+  exp1: 'exp_image1.jpeg',
+  exp2: 'exp_image2.jpeg',
+  exp3: 'exp_image3.jpeg',
   beep: 'beep.mp3',
   doubleBeep: 'double_beep.mp3'
 };
 
-// how long to show each experimental image *before* the 60s timer starts (ms)
+// show each experimental image briefly before the 60s timer (ms)
 const EXP_IMAGE_LEADIN = 1000; // change as needed
 
 const timeline = [];
+
+/* Preload assets (fails early if a file is missing) */
+timeline.push({
+  type: 'preload',
+  images: [FILES.testImage, FILES.startImage, FILES.exp1, FILES.exp2, FILES.exp3],
+  audio: USE_BEEPS ? [FILES.beep, FILES.doubleBeep] : [],
+  continue_after_error: false
+});
 
 /* START button (begin experiment) */
 timeline.push({
@@ -76,7 +85,7 @@ timeline.push({
   type: 'html-keyboard-response',
   stimulus: `
     <div class="center">
-      <img class="stim" src="${FILES.testImage}" alt="test image" />
+      <img class="stim" src="\${FILES.testImage}" alt="test image" />
       <br />
       <button onclick="jsPsych.finishTrial()">START</button>
     </div>
@@ -88,7 +97,7 @@ timeline.push({
 for (let i = 15; i >= 0; i--) {
   timeline.push({
     type: 'html-keyboard-response',
-    stimulus: `<div class="countdown">${i}</div>`,
+    stimulus: \`<div class="countdown">\${i}</div>\`,
     choices: jsPsych.NO_KEYS,
     trial_duration: 1000
   });
@@ -102,29 +111,27 @@ timeline.push({
   trial_duration: 2000
 });
 
-/* Helper: experimental image block + 60s timer + beeps + end screen */
+/* Helper: experimental image block + 60s timer + optional beeps + end screen */
 function addExpBlock(imageFile, isFinal = false) {
   // brief lead-in with the image
   timeline.push({
     type: 'html-keyboard-response',
     stimulus: `
       <div class="center">
-        <img class="stim" src="${imageFile}" alt="experimental image" />
+        <img class="stim" src="\${imageFile}" alt="experimental image" />
       </div>
     `,
     choices: jsPsych.NO_KEYS,
     trial_duration: EXP_IMAGE_LEADIN
   });
 
-  // first second of 60s countdown: start beep + image + "60"
+  // first second of 60s countdown: optional start beep + image + "60"
   timeline.push({
     type: 'html-keyboard-response',
     stimulus: `
       <div class="center">
-        <audio autoplay>
-          <source src="${FILES.beep}" type="audio/mpeg">
-        </audio>
-        <img class="stim" src="${imageFile}" alt="experimental image" />
+        \${USE_BEEPS ? \`<audio autoplay><source src="\${FILES.beep}" type="audio/mpeg"></audio>\` : ''}
+        <img class="stim" src="\${imageFile}" alt="experimental image" />
         <div class="countdown">60</div>
       </div>
     `,
@@ -138,8 +145,8 @@ function addExpBlock(imageFile, isFinal = false) {
       type: 'html-keyboard-response',
       stimulus: `
         <div class="center">
-          <img class="stim" src="${imageFile}" alt="experimental image" />
-          <div class="countdown">${i}</div>
+          <img class="stim" src="\${imageFile}" alt="experimental image" />
+          <div class="countdown">\${i}</div>
         </div>
       `,
       choices: jsPsych.NO_KEYS,
@@ -149,14 +156,12 @@ function addExpBlock(imageFile, isFinal = false) {
 
   // end screen per block
   if (!isFinal) {
-    // double beep + KONIEC CZASU + DALEJ button
+    // optional double beep + KONIEC CZASU + DALEJ button
     timeline.push({
       type: 'html-keyboard-response',
       stimulus: `
         <div class="center">
-          <audio autoplay>
-            <source src="${FILES.doubleBeep}" type="audio/mpeg">
-          </audio>
+          \${USE_BEEPS ? \`<audio autoplay><source src="\${FILES.doubleBeep}" type="audio/mpeg"></audio>\` : ''}
           <div class="end-text">KONIEC CZASU</div>
           <div style="margin-top: 20px;">
             <button onclick="jsPsych.finishTrial()">DALEJ</button>
@@ -181,7 +186,7 @@ timeline.push({
   type: 'html-keyboard-response',
   stimulus: `
     <div class="center">
-      <img class="stim" src="${FILES.startImage}" alt="start experiment image" />
+      <img class="stim" src="\${FILES.startImage}" alt="start experiment image" />
       <br />
       <button onclick="jsPsych.finishTrial()">START</button>
     </div>
