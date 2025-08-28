@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Countdown Experiment (Images) — Fixed</title>
+  <title>Countdown Experiment (Images) — No Text During 60s</title>
 
   <!-- jsPsych core + plugins (v6.3.1) -->
   <script src="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/jspsych.js"></script>
@@ -95,7 +95,7 @@ timeline.push({
   choices: jsPsych.NO_KEYS
 });
 
-// 15-second countdown (15 → 0)
+// 15-second countdown (15 → 0) — unchanged per your prior design
 for (var i = 15; i >= 0; i--) {
   timeline.push({
     type: 'html-keyboard-response',
@@ -115,7 +115,7 @@ timeline.push({
 
 // Helper to add an "experimental image" block that:
 // (1) shows the image alone for 5s, THEN
-// (2) plays a beep and starts a 60→1 countdown with the image visible, THEN
+// (2) plays a beep and starts a 60s period with NO TEXT displayed (image only), THEN
 // (3) plays a double beep and shows an end screen.
 function addExpBlock(imageFile, isFinal) {
   // (1) Preview image for 5 seconds (no timer)
@@ -129,7 +129,7 @@ function addExpBlock(imageFile, isFinal) {
     trial_duration: 5000
   });
 
-  // (2) Beep exactly when the timer starts
+  // (2) Beep exactly when the 60s period starts
   if (USE_BEEPS) {
     timeline.push({
       type: 'call-function',
@@ -139,19 +139,16 @@ function addExpBlock(imageFile, isFinal) {
     });
   }
 
-  // (2) 60 -> 1 seconds with the image visible (exactly 60s total)
-  for (var s = 60; s >= 1; s--) {
-    timeline.push({
-      type: 'html-keyboard-response',
-      stimulus:
-        '<div class="center">' +
-          '<img class="stim" src="' + imageFile + '" alt="experimental image" />' +
-          '<div class="countdown">' + s + '</div>' +
-        '</div>',
-      choices: jsPsych.NO_KEYS,
-      trial_duration: 1000
-    });
-  }
+  // (2) 60 seconds with image ONLY (NO TEXT)
+  timeline.push({
+    type: 'html-keyboard-response',
+    stimulus:
+      '<div class="center">' +
+        '<img class="stim" src="' + imageFile + '" alt="experimental image" />' +
+      '</div>',
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 60000
+  });
 
   // (3) Double beep immediately after the 60s have elapsed
   if (USE_BEEPS) {
