@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Countdown Experiment — Timer Has No Image</title>
+  <title>Countdown Experiment — Perfectly Centered Timers</title>
 
   <!-- jsPsych core + plugins (v6.3.1) -->
   <script src="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/jspsych.js"></script>
@@ -12,8 +12,29 @@
   <link href="https://cdn.jsdelivr.net/npm/jspsych@6.3.1/css/jspsych.css" rel="stylesheet" />
 
   <style>
-    img.stim { width: 800px; max-width: 90%; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
-    .countdown { font-size: 100px; text-align: center; margin-top: 20vh; }
+    html, body { height: 100%; margin: 0; }
+    #jspsych-content { max-width: none; }
+    .fullscreen-center {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    img.stim {
+      width: 800px;
+      max-width: 90%;
+      margin-bottom: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .countdown {
+      font-size: 120px;
+      line-height: 1;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+    }
     .end-text  { font-size: 32px; text-align: center; margin-top: 30px; }
     .final-text{ font-size: 48px; text-align: center; margin-top: 30px; }
     .center    { text-align: center; }
@@ -96,11 +117,14 @@ timeline.push({
   choices: jsPsych.NO_KEYS
 });
 
-// 15-second countdown (15 → 0) — shows numbers only
+// 15-second countdown (15 → 0) — numbers centered
 for (var i = 15; i >= 0; i--) {
   timeline.push({
     type: 'html-keyboard-response',
-    stimulus: '<div class="countdown">' + i + '</div>',
+    stimulus:
+      '<div class="fullscreen-center">' +
+        '<div class="countdown">' + i + '</div>' +
+      '</div>',
     choices: jsPsych.NO_KEYS,
     trial_duration: 1000
   });
@@ -116,7 +140,7 @@ timeline.push({
 
 // Helper to add an "experimental image" block that:
 // (1) shows the image alone for 5s, THEN
-// (2) plays a beep and starts a 60→1 countdown with NUMBERS ONLY (NO IMAGE), THEN
+// (2) plays a beep and starts a 60→1 countdown with NUMBERS ONLY (NO IMAGE), centered, THEN
 // (3) plays a double beep and shows an end screen.
 function addExpBlock(imageFile, isFinal) {
   // (1) Preview image for 5 seconds (image only)
@@ -140,11 +164,14 @@ function addExpBlock(imageFile, isFinal) {
     });
   }
 
-  // (2) 60 -> 1 seconds with NUMBERS ONLY (NO IMAGE)
+  // (2) 60 -> 1 seconds with NUMBERS ONLY (NO IMAGE), centered
   for (var s = 60; s >= 1; s--) {
     timeline.push({
       type: 'html-keyboard-response',
-      stimulus: '<div class="countdown">' + s + '</div>',
+      stimulus:
+        '<div class="fullscreen-center">' +
+          '<div class="countdown">' + s + '</div>' +
+        '</div>',
       choices: jsPsych.NO_KEYS,
       trial_duration: 1000
     });
